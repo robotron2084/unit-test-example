@@ -13,7 +13,14 @@ TODO:
 
 ## Testing Setup
 TODO:
- * Using assembly references correctly.
+ ## Using assembly references correctly.
+When setting up tests, its important to understand and use assemblies for your tests. I also use them for my code, which is less important, but in general a good practice. 
+
+![Assembly Overview](images/test_assembly_overview.png)
+
+Tests can either be Editor tests or Play Mode tests, and it is unintuitive how to correctly set up your tests. I have never made a test that was for Play Mode, and I feel like if you are making Play Mode tests, you are not doing unit tests. Avoid setting up Play Mode Tests by ensuring your testing assembly is set to only compile for the editor (which is how unity knows its an Editor only test).
+
+![Assembly Only Compiles in Editor](images/test_assembly_for_editor.png)
  * Set up AssemblyInfo.cs with internal flags.
  * Setting up your tests to run fast.
  * The TestRunner Interface
