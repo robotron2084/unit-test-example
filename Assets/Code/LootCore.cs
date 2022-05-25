@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace com.enemyhideout.loot
@@ -29,7 +28,8 @@ namespace com.enemyhideout.loot
 
                 minValue += entry.Weight;
             }
-            return null;
+            // edge case: roll hit the top of the table.
+            return tableEntries[tableEntries.Count - 1].Item;
         }
 
         private static bool InRange(float val, float min, float max)

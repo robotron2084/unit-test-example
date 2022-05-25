@@ -6,6 +6,7 @@ using NUnit.Framework;
 
 public class LootCoreTests
 {
+    
     /// <summary>
     /// Unit tests test 'units'. Don't test your entire application, but individual areas.
     /// </summary>
@@ -95,9 +96,16 @@ public class LootCoreTests
         },
         new RollForItemTestCase
         {
+            Description = "Last Item, Near High Roll",
+            Entries = _testEntries1,
+            RandomValue = 2.99999f,
+            Expected = _item3
+        },
+        new RollForItemTestCase
+        {
             Description = "Last Item, High Roll",
             Entries = _testEntries1,
-            RandomValue = 2.0f,
+            RandomValue = 3.0f,
             Expected = _item3
         }
     };

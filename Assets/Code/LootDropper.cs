@@ -36,7 +36,7 @@ namespace com.enemyhideout.loot
         }
 
         /// <summary>
-        /// Gets our 
+        /// Rolls for an item and logs it out.
         /// </summary>
         private void RollForItem()
         {
