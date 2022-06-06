@@ -110,10 +110,106 @@ Tests can either be Editor tests or Play Mode tests, and it is unintuitive how t
  * The TestRunner Interface
 
 
-## ValueSource and Test Cases
-TODO: Talk about how to structure tests by using a test case and ValueSourceAttribute
+## Making Test Cases Data-Driven
+One of the reasons why tests are either abandoned or never done is the maintenance required. Tests can be difficult to maintain, but much of this is about how you write the tests. For example, let's say that we have a number of tests like so:
+```csharp
+[Test]
+public void TestLootDropWithMultipleItems()
+{
+    var random = new NotRandom();
+    var lootTable = new LootTable("thing1","thing2");
+    var output = LootCore.RollForItem(lootTable, random);
+    Assert.That(output, Is.EqualTo("thing1"); 
+}
 
-https://docs.nunit.org/articles/nunit/writing-tests/attributes/valuesource.html
+[Test]
+public void TestLootDropWithOneItem()
+{
+    var random = new NotRandom();
+    var lootTable = new LootTable("thing1");
+    var output = LootCore.RollForItem(lootTable, random);
+    Assert.That(output, Is.EqualTo("thing1"); 
+}
+
+[Test]
+public void TestLootDropWithNoItems()
+{
+    var random = new NotRandom();
+    var lootTable = new LootTable("thing1","thing2");
+    var output = LootCore.RollForItem(lootTable, random);
+    Assert.That(output, Is.EqualTo(null); 
+}
+
+... etc ...
+```
+
+It is quite common to see tests like this. These test are very repetitive. They have similar structures. It is likely that if the testing patterns change, we'd have to update *all* of these tests. That's a lot of work. Wouldn't it be better to have one test that is simply re-used with different data? nUnit's ValueSource attribute allows us to do this.
+
+```csharp
+[Test]
+public void TestRollForItem([ValueSource(nameof(RollForItemTestCases))] RollForItemTestCase testCase)
+{
+    var notRandom = new NotRandom(testCase.RandomValue);
+    var output = LootCore.RollForItem(testCase.Entries, notRandom);
+    Assert.That(output, Is.EqualTo(testCase.Expected));
+}
+
+```
+
+You can see within the above that what we're doing here is _parameterizing_ our test. Our test will get passed a `RollForItemTestCase` and this data will be used to describe the test and define our expected outcome. This is done using the [Value Source](https://docs.nunit.org/articles/nunit/writing-tests/attributes/valuesource.html) attribute of nUnit. 
+
+```csharp
+public class RollForItemTestCase
+{
+    public string Description;
+    public List<LootTableEntry> Entries;
+    public float RandomValue;
+    public string Expected;
+
+    public override string ToString()
+    {
+        return Description;
+    }
+}
+```
+A test case is simply a data object passed into a class. It does not need to extent When defining test cases this way, you need to override the `ToString` method. This allows the nUnit interface to be able to display a human readable description:
+
+![Test Runner](images/test-runner.png)
+
+
+We can now define our tests as a list like so (the below is psuedo code):
+```csharp
+public static List<RollForItemTestCase> RollForItemTestCases = new List<RollForItemTestCase>()
+{
+    new RollForItemTestCase
+    {
+        Description = "Multiple Items",
+        Entries = "thing1","thing2",
+        RandomValue = 0.0f,
+        Expected = "thing1"
+    }
+    ...
+};
+```
+This makes creating new test cases much simpler, and reduces the duplication!
+
+## The [TestCase] Attribute 
+
+I should mention that it is also possible to create test cases via [TestCase](https://docs.nunit.org/articles/nunit/writing-tests/attributes/testcase.html) attribute:
+
+```csharp
+[TestCase(12, 3, 4)]
+[TestCase(12, 2, 6)]
+[TestCase(12, 4, 3)]
+public void DivideTest(int n, int d, int q)
+{
+    Assert.AreEqual(q, n / d);
+}
+```
+I have never used this attribute, due to it only being useful in simplistic tests. The lack of any description on the attribute also means its difficult to understand what is being tested. It also does not allow you to re-use static data, which is our next topic.
+
+### Re-using static data in Test Cases
+TODO: Talk about how to use static data in a test case.
 
 ## Mocks and Stubs
 TODO: Talk about mocks and stubs and how to avoid them.
@@ -125,3 +221,11 @@ http://enemyhideout.com/2022/04/taming-the-code-jungle-fc-is-in-game-development
 
 ## Randomness in Tests
 TODO: Talk about IRandom and why you should write code this way.
+
+## Key Takeaways
+    * Write **unit** tests not 'big' tests.
+    * Avoid adding your testable code to Monobehaviours. 
+    * Write Editor tests.
+    * Use test cases for maintainability and readability.
+    * Use FC/IS to avoid mocks and stubs.
+
