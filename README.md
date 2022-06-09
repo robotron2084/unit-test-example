@@ -7,12 +7,12 @@ This is an article-as-a-project example of my general setup for unit testing wit
 This project involves testing a 'loot table'. Let's say you're making a dungeon crawler, and you need a mechanism to drop items. An item in the game may drop loot, and an item from the loot table is returned based on a randomly generated number.
 
 ### Main Classes
- * [`LootDropper.cs`](Assets\Code\LootDropper.cs) - An example class that drops an item from a loot table every second.
- * [`LootCore.cs`](Assets\Code\LootCore.cs) - The class that does the actual loot dropping.
+ * [`LootDropper.cs`](Assets/Code/LootDropper.cs) - An example class that drops an item from a loot table every second.
+ * [`LootCore.cs`](Assets/Code/LootCore.cs) - The class that does the actual loot dropping.
  * [`LootCoreTests.cs`](Assets/Code/Editor/Tests/LootCoreTests.cs) - Tests that LootCore drops like we think it should.
- * `LootTableData.cs` - A data class that contains a number of `LootTableEntry`s.
- * `LootTableEntry` - A data class that determines the probability of the entry dropping the given item.
- * `*Random.cs` - Classes that allow for the generation and abstraction of random number generation.
+ * [`LootTableData.cs`](Assets/Code/LootTableData.cs) - A data class that contains a number of `LootTableEntry`s.
+ * [`LootTableEntry`](Assets/Code/LootTableData.cs) - A data class that determines the probability of the entry dropping the given item.
+ * [`*Random.cs`](Assets/Code/Utils/EnemyRandom.cs) - Classes that allow for the generation and abstraction of random number generation.
 
 ## Testing in Game Development
 Testing in games is quite frequently something that is never done, or done after the fact. Why is it not common to test games in development? I think a lot of this comes down to not understanding *how* to test. But frequently code is written in such a way that makes it very difficult to test.
