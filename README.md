@@ -2,6 +2,18 @@
 
 This is an article-as-a-project example of my general setup for unit testing within Unity. It shows a few of what I consider best practices for testing within Unity. The target audience is intermediate-level developers and does not go into the basics of unit testing. For more beginner information I recommend checking out [Unity's Getting Started page.](https://docs.unity3d.com/Packages/com.unity.test-framework@1.1/manual/getting-started.html)
 
+
+## Project Overview
+This project involves testing a 'loot table'. Let's say you're making a dungeon crawler, and you need a mechanism to drop items. An item in the game may drop loot, and an item from the loot table is returned based on a randomly generated number.
+
+### Main Classes
+ * [`LootDropper.cs`](Assets\Code\LootDropper.cs) - An example class that drops an item from a loot table every second.
+ * [`LootCore.cs`](Assets\Code\LootCore.cs) - The class that does the actual loot dropping.
+ * [`LootCoreTests.cs`](Assets/Code/Editor/Tests/LootCoreTests.cs) - Tests that LootCore drops like we think it should.
+ * `LootTableData.cs` - A data class that contains a number of `LootTableEntry`s.
+ * `LootTableEntry` - A data class that determines the probability of the entry dropping the given item.
+ * `*Random.cs` - Classes that allow for the generation and abstraction of random number generation.
+
 ## Testing in Game Development
 Testing in games is quite frequently something that is never done, or done after the fact. Why is it not common to test games in development? I think a lot of this comes down to not understanding *how* to test. But frequently code is written in such a way that makes it very difficult to test.
 
@@ -12,7 +24,6 @@ Long term, if you want your game to be stable, it is wise to include some automa
  * Game play logic that 'usually works' but sometimes just...doesn't?
  * Need to rewrite a big chunk of code and ensure that the new system works identical to the old.
  * The #1 Reason: _Fixing one thing...and breaking another!_ This happens more often than I'd like to admit.
- * 
 
 ## Unit Testing Vs. Other Tests
 In the past I've used testing to test rules engines for games. When those games had issues, and a bug was created, I'd create a new test with the bug number and add it to the suite. I've also used tests in a 'bot' fashion to play through a game and find unsolvable areas. I've also used them to ensure that things like web requests worked as I expected them to.
@@ -272,22 +283,29 @@ Again, this goes back to maintainability of tests being just as important as the
 A common testing requirement is the creation of what are frequently called mocks and stubs. These go by many names such as 'test doubles', fakes, etc. We'll just call these 'mocks'. A 'mock' is a class that looks and acts predictably in order to provide a replacement for a larger, more complicated class that cannot be easily initialized for purposes of testing. For example, you may want to mock out an object for testing that would normally require some kind of net connection that you don't have at testing time.
 Libraries such as [nSubstitute](https://nsubstitute.github.io/) allow for the easy creation of mocks, allowing you to work around dependency problems.
 
-
-### Getting Rid of Mocks and Stubs
+### Reducing Mocks and Stubs
 
 Mocks are yet another potential roadblock to maintainability. Having to create mocks for testing purposes requires you to write code twice. Mocks have to be maintained alongside your production code. So as mentioned before, using FC/IS to structure your code is the preferred way for me to avoid this additional maintenance. 
 
  As I have talked and presented on this topic, a frequent question I get is 'why don't you like mocks'? I want to be clear that they have their place, and I frequently use them. But sometimes they are completely unnecessary if the code is simply structured in a way that doesn't require these dependencies. So don't take this as advice that you shouldn't use mocks, but simply to structure your code in a way that doesn't require them in the first place.
 
-## Using FC/IS to write testable code.
-TODO: Explain how the FC/IS pattern relates to unit testing.
-
-http://enemyhideout.com/2022/04/taming-the-code-jungle-fc-is-in-game-development/
-
 ## Randomness in Tests
-TODO: Talk about IRandom and why you should write code this way.
+
+So when is a mock appropriate for testing? A good example is randomness. Games use randomness quite frequently so its only natural to have a mock available that allows us to effectively control for it. In this example we create an interface called IRandom and create two implementations: 
+ * `EnemyRandom` - Wraps Unity's built in random number generator.
+ * `NotRandom` - Allows for a predictable series of numbers to be returned for purposes of testing.
+
+You can see here that the mock `NotRandom` allows us to create a known loot roll:
+```csharp
+var notRandom = new NotRandom(testCase.RandomValue);
+var output = LootCore.RollForItem(testCase.Entries, notRandom);
+```
+This predictability allows us to easily test the boundaries of a loot roll. We can ensure that edge cases are correctly handled. For example, its possible to roll a `1.0f` or a `0.0f`? These edges could cause a crash for a player if not correctly tested for!
 
 ## Key Takeaways
+
+Please feel free to look more at the tests and the code in this project to get more of a feel of one method of making your game more testable. But if there is anything I'd want you to take away from reading this it is:
+
 * Write **unit** tests not 'big' tests.
 * Avoid adding your testable code to Monobehaviours. 
 * Write Editor tests.
